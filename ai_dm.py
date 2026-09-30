@@ -25,7 +25,8 @@ from anthropic import Anthropic
 from fastapi import FastAPI, Request
 
 app = FastAPI()
-client = Anthropic()  # ANTHROPIC_API_KEY ni o'zi o'qiydi
+_ws = os.getenv("ANTHROPIC_WORKSPACE_ID")
+client = Anthropic(default_headers={"anthropic-workspace-id": _ws} if _ws else None)
 
 MODEL = os.getenv("CLAUDE_MODEL", "claude-haiku-4-5-20251001")
 TG_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
@@ -93,7 +94,7 @@ def send_lead_to_telegram(data: dict, result: dict, phone: str) -> None:
             timeout=10,
         )
     except Exception as e:
-        print("Telegram xato:", e)
+        print("Telegram xato:", e, flush=True)
 
 
 @app.get("/")
@@ -109,7 +110,7 @@ async def ai(req: Request):
     data = await req.json()
     cid = str(data.get("contact_id") or data.get("username") or "unknown")
     text = str(data.get("text") or "").strip()
-      print(f"KELDI: cid={cid!r} text={text!r} user={data.get('username')!r}", flush=True)
+    print(f"KELDI: cid={cid!r} text={text!r} user={data.get('username')!r}", flush=True)
     if not text:
         return {"reply": "Assalomu alaykum! 😊 Qanday yordam bera olaman?", "stage": "cold"}
 
@@ -127,7 +128,7 @@ async def ai(req: Request):
         result = parse_model_output(raw)
         hist.append({"role": "assistant", "content": raw})
     except Exception as e:
-        print("Claude xato:", e)
+        print("Claude xato:", e, flush=True)
         hist.pop()  # muvaffaqiyatsiz xabarni tarixdan olib tashlaymiz
         result = {"reply": FALLBACK_REPLY, "stage": "unknown"}
 
