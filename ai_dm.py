@@ -109,6 +109,7 @@ async def ai(req: Request):
     data = await req.json()
     cid = str(data.get("contact_id") or data.get("username") or "unknown")
     text = str(data.get("text") or "").strip()
+      print(f"KELDI: cid={cid!r} text={text!r} user={data.get('username')!r}", flush=True)
     if not text:
         return {"reply": "Assalomu alaykum! 😊 Qanday yordam bera olaman?", "stage": "cold"}
 
